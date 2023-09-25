@@ -1,4 +1,7 @@
-![image](https://github.com/subhash-suthar/OEECalculation/assets/72193348/3f25997b-2ec2-474b-a696-29c702bda4b5)# OEECalculation
+![image](https://github.com/subhash-suthar/OEECalculation/assets/72193348/23ef3941-a7c8-4586-b838-e44b9ddd5c56)
+
+
+# OEECalculation
 
 Certainly! Here's a sample GitHub README file with formulas and sample input/output for your OEE calculator:
 
