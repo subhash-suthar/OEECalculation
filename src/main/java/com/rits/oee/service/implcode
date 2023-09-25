@@ -1,0 +1,47 @@
+package com.rits.oee.service;
+
+
+import com.rits.oee.model.OeeData;
+import com.rits.oee.repository.OeeRepository;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Service
+public class OeeServiceImpl implements OeeService {
+
+    private final OeeRepository oeeRepository;
+
+    public OeeServiceImpl(OeeRepository oeeRepository) {
+        this.oeeRepository = oeeRepository;
+    }
+
+    @Override
+    @Transactional
+    public OeeData saveOeeData(OeeData oeeData) {
+        if (isValidOeeData(oeeData)) {
+            // Perform any additional logic if needed
+            return oeeRepository.save(oeeData);
+        } else {
+            throw new IllegalArgumentException("Invalid OeeData");
+        }
+    }
+
+    private boolean isValidOeeData(OeeData oeeData) {
+        return false;
+    }
+
+    @Override
+    public OeeData getOeeDataById(String id) {
+        return oeeRepository.findById(id).orElseThrow();
+    }
+
+    @Override
+    public List<OeeData> getAllOeeData() {
+        return null;
+    }
+}
