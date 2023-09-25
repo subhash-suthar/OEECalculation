@@ -1,6 +1,8 @@
-# OEECalculation
+![image](https://github.com/subhash-suthar/OEECalculation/assets/72193348/3f25997b-2ec2-474b-a696-29c702bda4b5)# OEECalculation
 
 Certainly! Here's a sample GitHub README file with formulas and sample input/output for your OEE calculator:
+
+![productionUnitXMl](https://github.com/subhash-suthar/OEECalculation/assets/72193348/7d2be95c-0d08-4d40-b676-11d8b2353f61)
 
 ```markdown
 # Overall Equipment Efficiency (OEE) Calculator
