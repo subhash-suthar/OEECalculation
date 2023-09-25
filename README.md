@@ -1,4 +1,5 @@
-![image](https://github.com/subhash-suthar/OEECalculation/assets/72193348/23ef3941-a7c8-4586-b838-e44b9ddd5c56)
+![image](https://github.com/subhash-suthar/OEECalculation/assets/72193348/7fe8be17-e588-472a-b4b0-32d8fa2c4158)
+
 
 
 # OEECalculation
