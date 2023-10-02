@@ -1,0 +1,162 @@
+package com.example.task.Data;
+
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.math.BigDecimal;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
+@Document(collection = "productionUnitDataBase")
+public class OeeData {
+
+    @Id
+    private String id;
+    private String startTime;
+    private String endTime;
+    private double plannedProductionTime;
+    private double runtime;
+    private double cycleTime;
+    private int totalProducedCount;
+    private int goodCount;
+    private int badCount;
+    private double downtime;
+    private double availability;
+    private double quality;
+    private double performance;
+    private double oee;
+
+    public OeeData(String id, String startTime, String endTime, double plannedProductionTime, double runtime, double availability, double cycleTime, int totalProducedCount, int goodCount, int badCount, double quality, double oee) {
+        this.id = id;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.plannedProductionTime = plannedProductionTime;
+        this.runtime = runtime;
+        this.cycleTime = cycleTime;
+        this.totalProducedCount = totalProducedCount;
+        this.goodCount = goodCount;
+        this.badCount = badCount;
+        this.downtime = calculateDowntime(startTime, endTime); // Calculate downtime
+        this.availability = availability;
+        this.quality = quality;
+        this.oee = oee;
+        this.performance = calculatePerformance(cycleTime, totalProducedCount, runtime); // Calculate performance
+    }
+
+    private double calculatePerformance(double cycleTime, int totalProducedCount, double runtime) {
+        return cycleTime;
+    }
+
+    // Other getters and setters...
+
+    public String getOee() {
+        return String.valueOf(oee);
+    }
+
+    public void setOee(String oee) {
+        this.oee = Double.parseDouble(oee);
+    }
+
+    public String getPerformance() {
+        return String.valueOf(performance);
+    }
+
+    public void setPerformance(String performance) {
+        this.performance = Double.parseDouble(performance);
+    }
+
+    // Calculate downtime based on start and end times
+    private double calculateDowntime(String startTime, String endTime) {
+        // Parse start and end times into LocalDateTime objects
+        LocalDateTime start = LocalDateTime.parse(startTime, DateTimeFormatter.ISO_DATE_TIME);
+        LocalDateTime end = LocalDateTime.parse(endTime, DateTimeFormatter.ISO_DATE_TIME);
+
+        // Calculate the duration between start and end times
+        Duration duration = Duration.between(start, end);
+
+        // Calculate downtime in hours
+        long downtimeMinutes = duration.toMinutes();
+        return downtimeMinutes / 60.0; // Convert minutes to hours
+    }
+
+    public String getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(String startTime) {
+        this.startTime = startTime;
+    }
+
+    public String getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(String endTime) {
+        this.endTime = endTime;
+    }
+
+    public double getPlannedProductionTime() {
+        return plannedProductionTime;
+    }
+
+    public void setPlannedProductionTime(double plannedProductionTime) {
+        this.plannedProductionTime = plannedProductionTime;
+    }
+
+    public int getTotalProducedCount() {
+        return totalProducedCount;
+    }
+
+    public void setTotalProducedCount(int totalProducedCount) {
+        this.totalProducedCount = totalProducedCount;
+    }
+
+    public int getBadCount() {
+        return badCount;
+    }
+
+    public void setBadCount(int badCount) {
+        this.badCount = badCount;
+    }
+
+    public double getCycleTime() {
+        return cycleTime;
+    }
+
+    public void setCycleTime(double cycleTime) {
+        this.cycleTime = cycleTime;
+    }
+
+    public void setDowntime(String downtime) {
+        this.downtime = Double.parseDouble(downtime);
+    }
+
+    public double getDowntime() {
+        return downtime;
+    }
+
+    public void setAvailability(String availability) {
+        this.availability = Double.parseDouble(availability);
+    }
+
+    public String getAvailability() {
+        return String.valueOf(availability);
+    }
+
+    public void setRuntime(String runtime) {
+        this.runtime = Double.parseDouble(runtime);
+    }
+
+    public String getRuntime() {
+        return String.valueOf(runtime);
+    }
+
+    public void setQuality(String quality) {
+        this.quality = Double.parseDouble(quality);
+    }
+
+    public String getQuality() {
+        return String.valueOf(quality);
+    }
+}

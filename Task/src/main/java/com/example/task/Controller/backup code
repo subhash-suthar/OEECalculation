@@ -1,0 +1,462 @@
+package com.example.task.Controller;
+
+import com.example.task.Data.OeeData;
+import com.example.task.service.OeeService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/productionunit")
+public class OeeController {
+
+    private final OeeService oeeService;
+
+    @Autowired
+    public OeeController(OeeService oeeService) {
+        this.oeeService = oeeService;
+    }
+
+    @PostMapping("/create")
+    public ResponseEntity<OeeData> createOeeData(@RequestBody OeeData oeeData) {
+        // Extract input values from the provided OeeData object
+        double runtime = oeeData.getRuntime();
+        double plannedProductionTime = oeeData.getPlannedProductionTime();
+        double CycleTime = oeeData.getCycleTime();
+        int totalProducedCount = oeeData.getTotalProducedCount();
+        int goodCount = oeeData.getGoodCount();
+
+        // Calculate Availability, Performance, Quality, and OEE here
+        double availability = calculateAvailability(runtime, plannedProductionTime);
+        double performance = calculatePerformance(CycleTime, totalProducedCount, runtime);
+        double quality = calculateQuality(goodCount, totalProducedCount);
+        double oee = calculateOee(availability, performance, quality);
+
+        oeeData.setAvailability(availability * 100);
+        oeeData.setPerformance(performance * 100);
+        oeeData.setQuality(quality * 100);
+        oeeData.setOee(oee * 100);
+
+        OeeData savedOeeData = oeeService.saveOeeData(oeeData);
+        return new ResponseEntity<>(savedOeeData, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<OeeData> getOeeDataById(@PathVariable String id) {
+        OeeData oeeData = oeeService.getOeeDataById(id);
+        if (oeeData != null) {
+            return new ResponseEntity<>(oeeData, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @GetMapping("/total-oee")
+    public ResponseEntity<Double> getTotalOee(@RequestBody OeeData oeeData) {
+        double totalOee = calculateTotalOee(oeeData);
+        return new ResponseEntity<>(totalOee * 100, HttpStatus.OK); // Convert to percentage
+    }
+
+    @GetMapping("/availability")
+    public ResponseEntity<Double> getAvailability(@RequestBody OeeData oeeData) {
+        double availability = calculateAvailability(oeeData.getRuntime(), oeeData.getPlannedProductionTime());
+        return new ResponseEntity<>(availability * 100, HttpStatus.OK); // Convert to percentage
+    }
+
+    @GetMapping("/performance")
+    public ResponseEntity<Double> getPerformance(@RequestBody OeeData oeeData) {
+        double performance = calculatePerformance(oeeData.getCycleTime(), oeeData.getTotalProducedCount(), oeeData.getRuntime());
+        return new ResponseEntity<>(performance * 100, HttpStatus.OK);
+    }
+
+    @GetMapping("/quality")
+    public ResponseEntity<Double> getQuality(@RequestBody OeeData oeeData) {
+        double quality = calculateQuality(oeeData.getGoodCount(), oeeData.getTotalProducedCount());
+        return new ResponseEntity<>(quality * 100, HttpStatus.OK);
+    }
+
+    private double calculateAvailability(double runtime, double plannedProductionTime) {
+        return runtime / plannedProductionTime;
+    }
+
+    private double calculatePerformance(double CycleTime, int totalProducedCount, double runtime) {
+        return (CycleTime * totalProducedCount) / runtime;
+    }
+
+    private double calculateQuality(int goodCount, int totalProducedCount) {
+        return (double) goodCount / totalProducedCount;
+    }
+
+    private double calculateOee(double availability, double performance, double quality) {
+        return availability * performance * quality;
+    }
+
+    private double calculateTotalOee(OeeData oeeData) {
+        double availability = calculateAvailability(oeeData.getRuntime(), oeeData.getPlannedProductionTime());
+        double performance = calculatePerformance(oeeData.getCycleTime(), oeeData.getTotalProducedCount(), oeeData.getRuntime());
+        double quality = calculateQuality(oeeData.getGoodCount(), oeeData.getTotalProducedCount());
+        return availability * performance * quality;
+    }
+}
+
+//30/09
+
+
+package com.example.task.Controller;
+
+import com.example.task.Data.OeeData;
+import com.example.task.service.OeeService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.text.DecimalFormat;
+import java.util.List;
+
+@RestController
+@RequestMapping("/productionunit")
+public class OeeController {
+
+    private final OeeService oeeService;
+    private final DecimalFormat decimalFormat;
+
+    @Autowired
+    public OeeController(OeeService oeeService) {
+        this.oeeService = oeeService;
+        this.decimalFormat = new DecimalFormat("0.0");
+    }
+
+    @PostMapping("/create")
+    public ResponseEntity<OeeData> createOeeData(@RequestBody OeeData oeeData) {
+        // Extract input values from the provided OeeData object
+        double runtime = oeeData.getRuntime();
+        double plannedProductionTime = oeeData.getPlannedProductionTime();
+        double CycleTime = oeeData.getCycleTime();
+        int totalProducedCount = oeeData.getTotalProducedCount();
+        int goodCount = oeeData.getGoodCount();
+
+        // Calculate Availability, Performance, Quality, and OEE here
+        double availability = calculateAvailability(runtime, plannedProductionTime);
+        double performance = calculatePerformance(CycleTime, totalProducedCount, runtime);
+        double quality = calculateQuality(goodCount, totalProducedCount);
+        double oee = calculateOee(availability, performance, quality);
+
+        // Format the calculated values as text with two decimal points
+        oeeData.setAvailability(decimalFormat.format(availability));
+        oeeData.setPerformance(decimalFormat.format(performance));
+        oeeData.setQuality(decimalFormat.format(quality));
+        oeeData.setOee(decimalFormat.format(oee));
+
+        OeeData savedOeeData = oeeService.saveOeeData(oeeData);
+        return new ResponseEntity<>(savedOeeData, HttpStatus.CREATED);
+    }
+    @GetMapping("/{id}")
+    public ResponseEntity<String> getOeeMetricsById(@PathVariable String id) {
+        OeeData oeeData = oeeService.getOeeDataById(id);
+        if (oeeData != null) {
+            String formattedMetrics = "Availability: " + decimalFormat.format(oeeData.getAvailability()) + "\n" +
+                    "Quality: " + decimalFormat.format(oeeData.getQuality()) + "\n" +
+                    "Performance: " + decimalFormat.format(oeeData.getPerformance()) + "\n" +
+                    "OEE: " + decimalFormat.format(oeeData.getOee());
+            return new ResponseEntity<>(formattedMetrics, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+    @GetMapping("/total-oee")
+    public ResponseEntity<String> getTotalOee(@RequestBody OeeData oeeData) {
+        double totalOee = calculateTotalOee(oeeData);
+        String formattedTotalOee = decimalFormat.format(totalOee);
+        return new ResponseEntity<>("Total OEE: " + formattedTotalOee, HttpStatus.OK);
+    }
+
+    @GetMapping("/availability")
+    public ResponseEntity<String> getAvailability(@RequestBody OeeData oeeData) {
+        double availability = calculateAvailability(oeeData.getRuntime(), oeeData.getPlannedProductionTime());
+        String formattedAvailability = decimalFormat.format(availability);
+        return new ResponseEntity<>("Availability: " + formattedAvailability, HttpStatus.OK);
+    }
+
+    @GetMapping("/performance")
+    public ResponseEntity<String> getPerformance(@RequestBody OeeData oeeData) {
+        double performance = calculatePerformance(oeeData.getCycleTime(), oeeData.getTotalProducedCount(), oeeData.getRuntime());
+        String formattedPerformance = decimalFormat.format(performance);
+        return new ResponseEntity<>("Performance: " + formattedPerformance, HttpStatus.OK);
+    }
+
+    @GetMapping("/quality")
+    public ResponseEntity<String> getQuality(@RequestBody OeeData oeeData) {
+        double quality = calculateQuality(oeeData.getGoodCount(), oeeData.getTotalProducedCount());
+        String formattedQuality = decimalFormat.format(quality);
+        return new ResponseEntity<>("Quality: " + formattedQuality, HttpStatus.OK);
+    }
+
+    private double calculateAvailability(double runtime, double plannedProductionTime) {
+        return runtime / plannedProductionTime;
+    }
+
+    private double calculatePerformance(double CycleTime, int totalProducedCount, double runtime) {
+        return (CycleTime * totalProducedCount) / runtime;
+    }
+
+    private double calculateQuality(int goodCount, int totalProducedCount) {
+        return (double) goodCount / totalProducedCount;
+    }
+
+    private double calculateOee(double availability, double performance, double quality) {
+        return availability * performance * quality;
+    }
+
+    private double calculateTotalOee(OeeData oeeData) {
+        double availability = calculateAvailability(oeeData.getRuntime(), oeeData.getPlannedProductionTime());
+        double performance = calculatePerformance(oeeData.getCycleTime(), oeeData.getTotalProducedCount(), oeeData.getRuntime());
+        double quality = calculateQuality(oeeData.getGoodCount(), oeeData.getTotalProducedCount());
+        return availability * performance * quality;
+    }
+}
+
+//32'
+package com.example.task.Controller;
+
+import com.example.task.Data.OeeData;
+import com.example.task.service.OeeService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.text.DecimalFormat;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
+@RestController
+@RequestMapping("/production")
+public class OeeController {
+
+    private final OeeService oeeService;
+    private final DecimalFormat decimalFormat;
+
+    @Autowired
+    public OeeController(OeeService oeeService) {
+        this.oeeService = oeeService;
+        this.decimalFormat = new DecimalFormat("0.0");
+    }
+
+    @PostMapping("/data")
+    public ResponseEntity<OeeData> createOeeData(@RequestBody OeeData oeeData) {
+        // Extract input values from the provided OeeData object
+        String startTime = oeeData.getStartTime();
+        String endTime = oeeData.getEndTime();
+        double plannedProductionTime = oeeData.getPlannedProductionTime();
+        int totalProducedCount = oeeData.getTotalProducedCount();
+        int badCount = oeeData.getBadCount();
+
+        // Calculate downtime (StopTime) in hours
+        double downtime = calculateDowntime(startTime, endTime);
+
+        // Calculate runtime using the updated downtime calculation
+        double runtime = plannedProductionTime - downtime;
+
+        double availability = calculateAvailability(runtime, plannedProductionTime);
+        double performance = calculatePerformance(oeeData.getCycleTime(), totalProducedCount, runtime);
+        double quality = calculateQuality(totalProducedCount, badCount);
+
+        double oee = calculateOee(availability, performance, quality);
+
+        OeeData savedOeeData = oeeService.saveOeeData(oeeData);
+        return new ResponseEntity<>(savedOeeData, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<String> getOeeMetricsById(@PathVariable String id) {
+        OeeData oeeData = oeeService.getOeeDataById(id);
+        if (oeeData != null) {
+            String formattedMetrics = "Availability: " + decimalFormat.format(Double.parseDouble(String.valueOf(oeeData.getAvailability()))) + "\n" +
+                    "Quality: " + decimalFormat.format(Double.parseDouble(String.valueOf(oeeData.getQuality()))) + "\n" +
+                    "Performance: " + decimalFormat.format(Double.parseDouble(String.valueOf(oeeData.getPerformance()))) + "\n" +
+                    "OEE: " + decimalFormat.format(Double.parseDouble(String.valueOf(oeeData.getOee())));
+            return new ResponseEntity<>(formattedMetrics, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @GetMapping("/availability")
+    public ResponseEntity<String> getAvailability(@PathVariable String id) {
+        OeeData oeeData = oeeService.getOeeDataById(id);
+        if (oeeData != null) {
+            double availability = calculateAvailability(oeeData.getRuntime(), oeeData.getPlannedProductionTime());
+            String formattedAvailability = decimalFormat.format(availability);
+            return new ResponseEntity<>("Availability: " + formattedAvailability, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    // Calculate and return Quality
+    @GetMapping("/quality")
+    public ResponseEntity<String> getQuality(@PathVariable String id) {
+        OeeData oeeData = oeeService.getOeeDataById(id);
+        if (oeeData != null) {
+            double quality = calculateQuality(oeeData.getGoodCount(), oeeData.getTotalProducedCount());
+            String formattedQuality = decimalFormat.format(quality);
+            return new ResponseEntity<>("Quality: " + formattedQuality, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    // Calculate and return Performance
+    @GetMapping("/performance")
+    public ResponseEntity<String> getPerformance(@PathVariable String id) {
+        OeeData oeeData = oeeService.getOeeDataById(id);
+        if (oeeData != null) {
+            double performance = calculatePerformance(oeeData.getCycleTime(), oeeData.getTotalProducedCount(), oeeData.getRuntime());
+            String formattedPerformance = decimalFormat.format(performance);
+            return new ResponseEntity<>("Performance: " + formattedPerformance, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+
+    private double calculateDowntime(String startTime, String endTime) {
+        // Parse start and end times into LocalDateTime objects
+        LocalDateTime start = LocalDateTime.parse(startTime, DateTimeFormatter.ISO_DATE_TIME);
+        LocalDateTime end = LocalDateTime.parse(endTime, DateTimeFormatter.ISO_DATE_TIME);
+
+        // Calculate the duration between start and end times
+        Duration duration = Duration.between(start, end);
+
+        // Calculate downtime in hours
+        long downtimeMinutes = duration.toMinutes();
+        return downtimeMinutes / 60.0; // Convert minutes to hours
+    }
+
+    private double calculateAvailability(double runtime, double plannedProductionTime) {
+        return runtime / plannedProductionTime;
+    }
+
+    private double calculatePerformance(double cycleTime, int totalProducedCount, double runtime) {
+        return (cycleTime * totalProducedCount) / runtime;
+    }
+
+    private double calculateQuality(int totalProducedCount, int badCount) {
+        return (double) (totalProducedCount - badCount) / totalProducedCount;
+    }
+
+    private double calculateOee(double availability, double performance, double quality) {
+        return availability * performance * quality;
+    }
+}
+
+
+
+package com.example.task.Controller;
+
+import com.example.task.Data.OeeData;
+import com.example.task.service.OeeService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.text.DecimalFormat;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
+@RestController
+@RequestMapping("/production")
+public class OeeController {
+
+    private final OeeService oeeService;
+    private final DecimalFormat decimalFormat;
+
+    @Autowired
+    public OeeController(OeeService oeeService) {
+        this.oeeService = oeeService;
+        this.decimalFormat = new DecimalFormat("0.0");
+    }
+
+    @PostMapping("/data")
+    public ResponseEntity<OeeData> createOeeData(@RequestBody OeeData oeeData) {
+        // Extract input values from the provided OeeData object
+        String startTime = oeeData.getStartTime();
+        String endTime = oeeData.getEndTime();
+        double plannedProductionTime = oeeData.getPlannedProductionTime();
+        int totalProducedCount = oeeData.getTotalProducedCount();
+        int badCount = oeeData.getBadCount();
+
+        // Calculate downtime (StopTime) in hours
+        double downtime = calculateDowntime(startTime, endTime);
+
+        // Calculate runtime using the updated downtime calculation
+        double runtime = plannedProductionTime - downtime;
+
+        double availability = calculateAvailability(runtime, plannedProductionTime);
+        double performance = calculatePerformance(oeeData.getCycleTime(), totalProducedCount, runtime);
+        double quality = calculateQuality(totalProducedCount, badCount);
+
+        double oee = calculateOee(availability, performance, quality);
+
+        // Set the calculated values back to the OeeData object
+        oeeData.setDowntime(Double.parseDouble(decimalFormat.format(downtime)));
+        oeeData.setRuntime(Double.parseDouble(decimalFormat.format(runtime)));
+        oeeData.setAvailability(Double.parseDouble(decimalFormat.format(availability)));
+        oeeData.setPerformance(Double.parseDouble(decimalFormat.format(performance)));
+        oeeData.setQuality(Double.parseDouble(decimalFormat.format(quality)));
+        oeeData.setOee(Double.parseDouble(decimalFormat.format(oee)));
+
+        OeeData savedOeeData = oeeService.saveOeeData(oeeData);
+        return new ResponseEntity<>(savedOeeData, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<OeeData> getOeeMetricsById(@PathVariable String id) {
+        OeeData oeeData = oeeService.getOeeDataById(id);
+        if (oeeData != null) {
+            return new ResponseEntity<>(oeeData, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    // Add other endpoints for specific OEE metrics (availability, quality, performance) if needed
+
+    private double calculateDowntime(String startTime, String endTime) {
+        // Parse start and end times into LocalDateTime objects
+        LocalDateTime start = LocalDateTime.parse(startTime, DateTimeFormatter.ISO_DATE_TIME);
+        LocalDateTime end = LocalDateTime.parse(endTime, DateTimeFormatter.ISO_DATE_TIME);
+
+        // Calculate the duration between start and end times
+        Duration duration = Duration.between(start, end);
+
+        // Calculate downtime in hours
+        long downtimeMinutes = duration.toMinutes();
+        return downtimeMinutes / 60.0; // Convert minutes to hours
+    }
+
+    private double calculateAvailability(double runtime, double plannedProductionTime) {
+        return runtime / plannedProductionTime;
+    }
+
+    private double calculatePerformance(double cycleTime, int totalProducedCount, double runtime) {
+        return (cycleTime * totalProducedCount) / runtime;
+    }
+
+    private double calculateQuality(int totalProducedCount, int badCount) {
+        return (double) (totalProducedCount - badCount) / totalProducedCount;
+    }
+
+    private double calculateOee(double availability, double performance, double quality) {
+        return availability * performance * quality;
+    }
+}
+
+
